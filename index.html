@@ -52,21 +52,6 @@
                     <div class="mb-3">
                         <input type="text" id="prompt" class="form-control" placeholder="E.g., A futuristic robot walking in a desert" required>
                     </div>
-                    <div class="row">
-                        <div class="col-md-4 mb-3">
-                            <input type="number" id="imageWidth" class="form-control" placeholder="Width (px)" value="512">
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <input type="number" id="imageHeight" class="form-control" placeholder="Height (px)" value="512">
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <select id="quality" class="form-select">
-                                <option value="high" selected>High Quality</option>
-                                <option value="medium">Medium Quality</option>
-                                <option value="low">Low Quality</option>
-                            </select>
-                        </div>
-                    </div>
                     <div class="text-center">
                         <button type="submit" class="btn btn-primary w-100">Generate Image</button>
                     </div>
@@ -118,21 +103,30 @@
             e.preventDefault();
 
             const prompt = document.getElementById('prompt').value.trim();
-            const width = document.getElementById('imageWidth').value || 512;
-            const height = document.getElementById('imageHeight').value || 512;
-            const quality = document.getElementById('quality').value;
+            if (!prompt) {
+                alert("Please enter a prompt!");
+                return;
+            }
 
             loading.classList.remove('d-none');
             outputSection.classList.add('d-none');
 
             try {
-                const response = await fetch(`https://botmaker.serv00.net/pollination.php?prompt=${encodeURIComponent(prompt)}`);
+                const apiURL = `https://botmaker.serv00.net/pollination.php?prompt=${encodeURIComponent(prompt)}`;
+                const response = await fetch(apiURL);
+
+                // Check if response is valid
+                if (!response.ok) {
+                    throw new Error("Failed to generate image. Please try again.");
+                }
+
+                // Use the API's URL as the image source
                 const imageUrl = response.url;
 
                 generatedImage.src = imageUrl;
                 outputSection.classList.remove('d-none');
             } catch (error) {
-                alert('Failed to generate image. Please try again.');
+                alert(error.message);
             } finally {
                 loading.classList.add('d-none');
             }
