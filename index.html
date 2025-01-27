@@ -1,147 +1,283 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Image Generator</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-        }
-        .dark-mode {
-            background-color: #1a202c;
-            color: #f8f9fa;
-        }
-        .dark-mode input,
-        .dark-mode select {
-            background-color: #2d3748;
-            color: #f8f9fa;
-        }
-        .dark-mode .card {
-            background-color: #2d3748;
-            border-color: #4a5568;
-        }
-        .dark-mode button {
-            background-color: #4a5568;
-            color: #f8f9fa;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Unlimited AI Generate Photo</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f8f9fa;
+      transition: background-color 0.5s ease;
+    }
+    .generated-image {
+      width: 100%;
+      max-height: 500px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease;
+    }
+    .generated-image:hover {
+      transform: scale(1.05);
+    }
+    .gallery img {
+      width: 100%;
+      height: auto;
+      margin: 10px 0;
+      border-radius: 8px;
+    }
+    .footer {
+      text-align: center;
+      padding: 20px;
+      background-color: #343a40;
+      color: #fff;
+      font-size: 14px;
+    }
+    .dark-mode {
+      background-color: #343a40;
+      color: #fff;
+    }
+    .light-mode {
+      background-color: #f8f9fa;
+      color: #000;
+    }
+    .loader {
+      border: 5px solid #f3f3f3;
+      border-top: 5px solid #3498db;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin: auto;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .navbar {
+      background-color: #FFD700; /* Golden color */
+      transition: background-color 0.5s ease;
+    }
+    .navbar a {
+      color: black !important;
+    }
+    .navbar-brand {
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+    .zoom-in-button, .zoom-out-button {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background-color: rgba(0, 0, 0, 0.5);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      padding: 10px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .zoom-in-button {
+      top: 60px;
+    }
+    .zoom-out-button {
+      top: 100px;
+    }
+    .progress-bar-container {
+      position: relative;
+      height: 10px;
+      background-color: #f3f3f3;
+      border-radius: 5px;
+      margin-top: 20px;
+    }
+    .progress-bar {
+      height: 100%;
+      background-color: #FFD700; /* Golden color */
+      width: 0;
+      border-radius: 5px;
+      transition: width 1s ease-in-out;
+    }
+    iframe {
+      border-radius: 10px;
+      border: none;
+      display: none;
+      width: 100%;
+      height: 500px;
+    }
+    .card {
+      border: 2px solid #FFD700; /* Golden color */
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      transition: box-shadow 0.3s ease;
+    }
+    .card:hover {
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+    .card-body {
+      padding: 20px;
+      text-align: center;
+    }
+    .card-title {
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+  </style>
 </head>
-<body class="bg-light">
+<body class="light-mode">
 
-    <!-- Header -->
-    <header class="bg-primary text-white text-center py-3">
-        <h1 class="text-3xl font-bold">AI Image Generator</h1>
-        <p class="lead">Generate stunning images with the power of AI</p>
-    </header>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-light">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">Unlimited AI Generate Photo</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link active" href="#" id="languageSwitch" onclick="toggleLanguage()">Switch to বাংলা</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#" id="themeSwitch" onclick="toggleTheme()">Switch Theme</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
 
-    <!-- Main Content -->
-    <div class="container my-5">
-        <!-- Dark Mode Toggle -->
-        <div class="text-end mb-3">
-            <button id="darkModeToggle" class="btn btn-outline-secondary">Enable Dark Mode</button>
-        </div>
-
-        <!-- Input Section -->
-        <div class="card shadow-lg">
-            <div class="card-body">
-                <form id="imageForm">
-                    <h3 class="card-title text-center mb-4">Enter Your Prompt</h3>
-                    <div class="mb-3">
-                        <input type="text" id="prompt" class="form-control" placeholder="E.g., A futuristic robot walking in a desert" required>
-                    </div>
-                    <div class="text-center">
-                        <button type="submit" class="btn btn-primary w-100">Generate Image</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <!-- Loading Section -->
-        <div id="loading" class="text-center my-4 d-none">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading...</span>
-            </div>
-            <p>Generating your image...</p>
-        </div>
-
-        <!-- Output Section -->
-        <div id="outputSection" class="mt-4 d-none">
-            <h3 class="text-center">Generated Image:</h3>
-            <div class="text-center">
-                <img id="generatedImage" class="img-fluid rounded shadow" alt="Generated Image">
-            </div>
-            <div class="mt-3 text-center">
-                <button class="btn btn-success me-2 format-btn" data-format="jpg">Download as JPG</button>
-                <button class="btn btn-success format-btn" data-format="png">Download as PNG</button>
-            </div>
-        </div>
+  <div class="container py-5">
+    <div class="text-center mb-4">
+      <h1 class="text-3xl font-bold text-primary" id="title">Unlimited AI Generate Photo</h1>
+      <p class="text-gray-500" id="description">Create stunning AI images with a simple prompt!</p>
     </div>
 
-    <!-- Footer -->
-    <footer class="bg-dark text-white text-center py-3">
-        <p>AI Image Generator &copy; 2025 | Designed for Everyone</p>
-    </footer>
+    <div class="row justify-content-center">
+      <div class="col-md-8">
+        <div class="input-group mb-3">
+          <input id="promptInput" type="text" class="form-control" placeholder="Enter your image prompt here..." aria-describedby="generatePrompt" data-bs-toggle="tooltip" title="Type a prompt like 'A flying cat'">
+          <button class="btn btn-primary" onclick="generateImage()">Generate</button>
+        </div>
+        <div class="loader" id="loading" style="display: none;"></div>
+        
+        <!-- Progress Bar for Loading -->
+        <div class="progress-bar-container" id="progressBarContainer" style="display: none;">
+          <div class="progress-bar" id="progressBar"></div>
+        </div>
 
-    <script>
-        const form = document.getElementById('imageForm');
-        const loading = document.getElementById('loading');
-        const outputSection = document.getElementById('outputSection');
-        const generatedImage = document.getElementById('generatedImage');
-        const darkModeToggle = document.getElementById('darkModeToggle');
+        <!-- Image Preview -->
+        <div id="imagePreview" class="mt-4">
+          <img id="generatedImage" class="generated-image" style="display:none;" />
+        </div>
+      </div>
+    </div>
 
-        // Dark Mode Toggle
-        darkModeToggle.addEventListener('click', () => {
-            document.body.classList.toggle('dark-mode');
-            darkModeToggle.textContent = document.body.classList.contains('dark-mode') ? 'Disable Dark Mode' : 'Enable Dark Mode';
-        });
+    <div class="gallery mt-5">
+      <h4>Generated Images</h4>
+      <div id="imageGallery" class="d-flex flex-wrap"></div>
+    </div>
 
-        // Image Generation
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
+    <!-- Card for Features -->
+    <div class="row mt-5">
+      <div class="col-md-4">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">Instant Generation</h5>
+            <p class="card-text">Generate images instantly with a prompt, using AI technology.</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">High-Quality Images</h5>
+            <p class="card-text">Get high-resolution, visually stunning images based on your input.</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">Customizable Themes</h5>
+            <p class="card-text">Choose between light and dark modes with a golden accent theme.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-            const prompt = document.getElementById('prompt').value.trim();
-            if (!prompt) {
-                alert("Please enter a prompt!");
-                return;
-            }
+  <!-- Footer -->
+  <div class="footer">
+    <p>Design & Development By Mohammad Sheikh Shahinur Rahman, Chief Technology Officer, IT Amadersomaj Inc.</p>
+  </div>
 
-            loading.classList.remove('d-none');
-            outputSection.classList.add('d-none');
+  <script>
+    let isEnglish = true;
 
-            try {
-                const apiURL = `https://botmaker.serv00.net/pollination.php?prompt=${encodeURIComponent(prompt)}`;
-                const response = await fetch(apiURL);
+    // Function to toggle language
+    function toggleLanguage() {
+      isEnglish = !isEnglish;
+      if (isEnglish) {
+        document.getElementById('title').innerText = 'Unlimited AI Generate Photo';
+        document.getElementById('description').innerText = 'Create stunning AI images with a simple prompt!';
+        document.getElementById('languageSwitch').innerText = 'Switch to বাংলা';
+      } else {
+        document.getElementById('title').innerText = 'অসীম কৃত্রিম বুদ্ধিমত্তা ছবি তৈরি করুন';
+        document.getElementById('description').innerText = 'একমাত্র প্রম্পট দিয়ে অবিশ্বাস্য ছবি তৈরি করুন!';
+        document.getElementById('languageSwitch').innerText = 'Switch to English';
+      }
+    }
 
-                // Check if response is valid
-                if (!response.ok) {
-                    throw new Error("Failed to generate image. Please try again.");
-                }
+    // Function to generate image and show preview
+    function generateImage() {
+      const prompt = document.getElementById('promptInput').value;
+      if (!prompt) {
+        alert('Please enter a prompt!');
+        return;
+      }
 
-                // Use the API's URL as the image source
-                const imageUrl = response.url;
+      // Show loading spinner
+      document.getElementById('loading').style.display = 'block';
+      document.getElementById('progressBarContainer').style.display = 'block';
 
-                generatedImage.src = imageUrl;
-                outputSection.classList.remove('d-none');
-            } catch (error) {
-                alert(error.message);
-            } finally {
-                loading.classList.add('d-none');
-            }
-        });
+      const apiUrl = `https://botmaker.serv00.net/pollination.php?prompt=${encodeURIComponent(prompt)}`;
 
-        // Download Buttons
-        document.querySelectorAll('.format-btn').forEach(button => {
-            button.addEventListener('click', () => {
-                const format = button.getAttribute('data-format');
-                const link = document.createElement('a');
-                link.href = generatedImage.src;
-                link.download = `generated-image.${format}`;
-                link.click();
-            });
-        });
-    </script>
+      const image = document.getElementById('generatedImage');
+      image.style.display = 'none';
+
+      // Simulate progress bar update
+      let progress = 0;
+      const progressInterval = setInterval(() => {
+        progress += 10;
+        document.getElementById('progressBar').style.width = progress + '%';
+        if (progress >= 100) {
+          clearInterval(progressInterval);
+          setTimeout(() => {
+            document.getElementById('loading').style.display = 'none';
+            image.style.display = 'block';
+            image.src = apiUrl; // Set the image source to the generated image
+            document.getElementById('progressBarContainer').style.display = 'none';
+          }, 500);
+        }
+      }, 500);
+    }
+
+    // Function to toggle between light and dark themes
+    function toggleTheme() {
+      const body = document.body;
+      const navbar = document.querySelector('.navbar');
+      const themeSwitcher = document.querySelector('.theme-switcher');
+      
+      if (body.classList.contains('light-mode')) {
+        body.classList.replace('light-mode', 'dark-mode');
+        navbar.classList.replace('navbar-light', 'navbar-dark');
+      } else {
+        body.classList.replace('dark-mode', 'light-mode');
+        navbar.classList.replace('navbar-dark', 'navbar-light');
+      }
+    }
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
